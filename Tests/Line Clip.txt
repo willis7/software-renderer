@@ -1,0 +1,96 @@
+#include <iostream>
+#include "Pipeline.h"
+#include <gl/glut.h>
+
+using namespace std;
+
+#define WINDOW_WIDTH 1000
+#define WINDOW_HEIGHT 800
+
+Pipeline pl;
+
+//Keep an array of the lights in the scene
+vector<Light> sceneLights;
+Light light1;
+
+//Points for bezier curve testing
+Vector3 points[4] = {Vector3(700,700,0),
+					 Vector3(300,400,100),
+					 Vector3(500, 0,0),
+					 Vector3(100,100,40)};
+
+
+// Initializes the 3D rendering
+void initRendering()
+{	
+	//Clear both buffers
+	pl.clear();
+
+	//Enables the lighting calculations
+	pl.enableLighting(false);
+
+	light1.setDiffuse(Color(1.0, 1.0, 1.0));
+	light1.setAmbient(Color(1.0, 0.0, 0.0));
+	light1.setSpecular(Color(1.0, 1.0, 1.0));
+	light1.setWorldVector(Vector3(1.0,1.0,1.0));
+	
+	sceneLights.push_back(light1);
+	
+	pl.setCullMode(CullBack);									//Back face cull = 1, front face = 2, none = 0								
+}
+
+//Called when window is resized
+void handleResize(int w, int h)			
+{
+	pl.clear();
+	pl.setViewport(0, 0, w, h);
+
+	pl.loadIdentity(Projection);
+
+	pl.perspective(60.0,				//Camera angle	
+					w/h,				// The Width-Height ratio
+					-1.0,				// The near Z clipping co-ordinate (dictates how close to the eye it is allowed to come before not getting shown)
+					-1000.0);			// The far Z clipping co-ordinates (dictates how far from the eye it is allowed to go before no longer getting shown)
+}
+
+/////////////////////////////////////////////////////////
+//////////// MAIN DRAWING ROUTINE ///////////////////////
+/////////////////////////////////////////////////////////
+void drawScene()
+{
+
+
+
+// LINE CLIP TEST
+	pl.drawLine(0,0,1,-10,10,0,0,1, 100, 10);
+
+
+
+
+
+// This calls for opengl to dump my frame buffer and then refresh the screen
+	pl.dump();
+	glutSwapBuffers();
+	glFlush();
+}
+
+int main(int argc, char** argv)
+{
+
+	//Initialise glut
+	glutInit(&argc, argv);
+	glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGB|GLUT_DEPTH);
+	glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);						//Set the window size
+
+	glutCreateWindow("Software Renderer");
+	initRendering();														//Initialise rendering
+
+	//Set handler functions for drawing, keypresses and window resizes
+	glutDisplayFunc(drawScene);
+	glutReshapeFunc(handleResize);
+
+	glutMainLoop();															//Start the main loop..... glutMainLoop never returns!! 
+																			//(tells glut to take control of the program i.e. handle the resizes)
+
+	return 0;																// This is never reached!!
+}
